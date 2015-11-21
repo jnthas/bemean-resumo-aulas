@@ -1,0 +1,5 @@
+{"_id":{"$oid":"5642a5354f9f678b0b9d94ad"},"name":"Snorlax","description":"Pokemon preguiçoso","type":"sleeping","attack":60.0,"height":0.6,"moves":["desvio"],"defense":78.0}
+{"_id":{"$oid":"5642a5844f9f678b0b9d94ae"},"name":"Blastoise","description":"Pokemon com bazooka","type":"shellfish","attack":40.0,"height":0.5,"moves":["desvio"],"attacks":["soco alto","soco baixo"],"defense":20.0}
+{"_id":{"$oid":"5642a5d24f9f678b0b9d94af"},"name":"Oddish","description":"Cara de cebola","type":"weed","attack":30.0,"height":0.1,"attacks":["soco alto","soco baixo"],"moves":["desvio"]}
+{"_id":{"$oid":"5642a6c64f9f678b0b9d94b1"},"name":"Rattata","description":"Ratata é bicho solto, ficar ligeiro ja faz parte do jogo","type":"mouse","attack":30.0,"height":0.1,"attacks":["soco alto","soco baixo"],"moves":["desvio"],"defense":68.0}
+{"_id":{"$oid":"564e91e0fab1c1c7d73bc5bc"},"name":"AindaNaoExisteMon","description":"Sem maiores informacoes","type":null,"attack":null,"height":null,"attacks":null,"moves":null}
