@@ -4,6 +4,28 @@
 
 ##Aula 2
 
+###Comandos básicos
+
+- *use*: especifica o banco de dados que será usado. Se não existir ele cria.
+  - Sintaxe: use nome_do_banco
+- *show dbs*: exibe os banco de dados criados e o espaço utilizado. O banco só é
+  criado quando se faz uma primeira inserção.
+
+
+###insert()
+
+Usado para inserir documentos
+- Sintaxe: db.collection.insert(doc);
+
+###save()
+
+Insere ou atualiza um documento. Para atualizar, é necessário recuperar o 
+documento com find() - retorna um Cursor - ou findOne() - retorna um objeto -, 
+realizar a alteração e depois salvar com save();
+- Sintaxe: db.collection.save(doc);
+
+
+
 ##Aula 3
 
 ###Sintaxe para fazer buscas
@@ -155,8 +177,6 @@ Para remover a coleção toda usar a função drop()
 ```
 db.collection.remove(query);
 ```
-
-
 
 
 
