@@ -1,23 +1,23 @@
-#MongoDB
+Resumo - Aulas MongoDB
+======================
 
-##Aula 1
+## Aula 1
 
-##Aula 2
+## Aula 2
 
-###Comandos básicos
+### Comandos básicos
 
 - *use*: especifica o banco de dados que será usado. Se não existir ele cria.
   - Sintaxe: use nome_do_banco
-- *show dbs*: exibe os banco de dados criados e o espaço utilizado. O banco só é
-  criado quando se faz uma primeira inserção.
+- *show dbs*: exibe os banco de dados criados e o espaço utilizado. O banco só é criado quando se faz uma primeira inserção.
 
 
-###insert()
+### insert()
 
 Usado para inserir documentos
 - Sintaxe: db.collection.insert(doc);
 
-###save()
+### save()
 
 Insere ou atualiza um documento. Para atualizar, é necessário recuperar o 
 documento com find() - retorna um Cursor - ou findOne() - retorna um objeto -, 
@@ -26,9 +26,9 @@ realizar a alteração e depois salvar com save();
 
 
 
-##Aula 3
+## Aula 3
 
-###Sintaxe para fazer buscas
+### Sintaxe para fazer buscas
 
 ```
 db.colecao.find({clausula}, {campos})
@@ -38,7 +38,7 @@ db.colecao.find({clausula}, {campos})
 Exemplo:
 db.pokemons.find({name: 'Pikachu'}, {name: 1, description: 1, _id: 0})
 ```
-###Operadores de comparação
+### Operadores de comparação
 ```
 <  é $lt
 <= é $lte
@@ -49,7 +49,7 @@ Exemplo:
 var query = {height: {$lt: 0.5}}
 ```
 
-###Operadores lógicos
+### Operadores lógicos
 ```
 $or  é OU 
 $nor é NOT OR (todos os registros que não vieram na busca com OR)
@@ -61,7 +61,7 @@ var query = {$or: [{name: 'Pikachu'}, {height: 1.69}]}
 
 ```
 
-###Operador existencial
+### Operador existencial
 
 Verifica se o campo existe
 
@@ -69,21 +69,21 @@ Verifica se o campo existe
 db.collection.find({campo: {$exists: true}});
 ```
 
-##Aula 4 - Parte 1
+## Aula 4 - Parte 1
 
-###update
+### update
 Diferente do save, não precisa buscar o documento antes. Possui 3 parametros:
 - query
 - modificação
 - options
 
-####Sintaxe
+#### Sintaxe
 
 ```
 db.colecao.update(query, mod, options);
 ```
 
-####Operadores de modificação
+#### Operadores de modificação
 
 - *$set*: modifica ou cria (se não existir) um valor
   - Sintaxe: {$set: {campo: valor}}
@@ -96,7 +96,7 @@ db.colecao.update(query, mod, options);
   negativo.
   - Sintaxe: {$inc: {campo: valor}}
 
-####Operadores de array
+#### Operadores de array
 
 - *$push*: adiciona um valor num campo array. Caso o campo não exista, ele cria.
   Se o campo não for um array, ocorre um erro.
@@ -112,13 +112,13 @@ db.colecao.update(query, mod, options);
   - Sintaxe: {$pullAll: {campo: [array_de_valores]}}
   
   
-##Aula 4 - Parte 2
+## Aula 4 - Parte 2
 
 ### Último parâmetro do update: options
 
 Serve para configurar valores diferentes do padrão para o update.
 
-####Sintaxe:
+#### Sintaxe:
 ```
 {
   upsert: boolean,
@@ -150,7 +150,7 @@ Serve para configurar valores diferentes do padrão para o update.
 
 Usado para fazer busca dentro de arrays no mongodb.
 
-####Operadores
+#### Operadores
 
 - $in: retorna os documentos que possuem ALGUM dos valores passados dentro do array.
   - Sintaxe: {campo: {$in: [Array_de_Valores]}}
@@ -172,23 +172,132 @@ Usado para fazer busca dentro de arrays no mongodb.
 Remover documentos do banco de dados
 Para remover a coleção toda usar a função drop()
 
-####Sintaxe: 
+#### Sintaxe: 
 
 ```
 db.collection.remove(query);
 ```
 
+## Aula 5
 
+### Performance find().length e count()
 
+- db.restaurantes.find().length() 
+  + mostra o total de registros da collection, mas dessa forma ele traz todos os registros pra memória pra depois contar.
+- db.restaurantes.count() 
+  + forma mais performática para saber o total de registros. 
 
+### distinct()
 
+Como no SQL, busca somente os valores distintos da collection.
 
+- Sintaxe: 
+  + db.collections.distinct(nome_coluna)
+  + Ex.: db.pokemons.distinct('type') -> só vai listar todos os tipos de pokemons cadastrados.
 
+### mongoexport
 
+```
+Exemplo:
+mongoexport --host 127.0.0.1 --db be-mean --collection pokemons --out pokemons.json
+```
 
+### limit() e skip()
 
+Usado para fazer paginação no mongodb.
 
+- limit()
+  - Sintaxe:
+    - db.collection.find(query).limit(numero_registros)
+    - limit() é como se fosse o TOP do SQL Server, traz os primeiros X registros que encontrar
+- skip()
+  - Sintaxe: 
+    - db.collection.find(query).limit(numero_registros).skip(numero_registros_pular)
+    - Dado que o limit() vai buscar sempre os X primeiros registros, o skip() pega os próximos registros de acordo com o parâmetro. Usar a formula numero_registros * pagina
+    - Page 1 - db.collection.find(query).limit(10).skip(10 * 0)
+    - Page 2 - db.collection.find(query).limit(10).skip(10 * 1)
 
+### group()
+
+Agrupar registros passando uma função de reduce no group.
+
+#### Sintaxe:
+```
+db.collection.group({
+  initial: {},
+  cond: {},
+  reduce: function(){},
+  finalize: function(){}
+});
+```
+Onde, 
+- initial: definição incial do objeto que será retornado
+- cond: condição para filtro do group
+- reduce: função de reduce
+- finalize: função que roda depois que o mongodb já processou os registros, pode-se adicionar mais propriedades no objeto retornado
+
+#### Exemplos:
+Mostra a contagem total de cada tipo dos pokemons, sendo que a defesa seja maior que 40
+```
+db.pokemons.group({
+  initial: {total: 0},
+  cond: {defense: {$gt: 40}},
+  reduce: function(curr, result) {
+    curr.types.forEach(function(type){
+      if (result[type]) {
+        result[type]++;
+      } else {
+        result[type] = 1;
+      }
+      result.total++;
+    });
+  }
+});
+```
+Soma o todas as defesas e ataques dos pokemons e adiciona 2 propriedades no final que é a média dos valores.
+```
+db.pokemons.group({
+  initial: {total: 0, defense: 0, attack: 0},
+  reduce: function (current, result) {
+    result.total++;
+    result.defense += current.defense;
+    result.attack += current.attack;
+  },
+  finalize: function (result) {
+    result.defense_avg = result.defense / result.total;
+    result.attack_avg = result.attack / result.total;
+  }
+});
+```
+
+### aggregate()
+
+Parecido com o group(), mas já possui funções prontas como sum e avg.
+
+#### Sintaxe: 
+```
+db.collection.aggregate([{$match: {}}, {$group: {}]);
+```
+Onde,
+- $match: pode-se aplicar qualquer condição para filtro
+- $group: atributo de agrupamento
+  + $avg: faz a média
+  + $sum: soma o valor do campo
+
+#### Exemplo:
+
+```
+db.collection.aggregate({
+  $group: {
+    _id: {},
+    defense_avg: {$avg: '$defense'},
+    attack_avg: {$avg: '$attack'},
+    defense: {$sum: '$defense'},
+    attack: {$sum '$attack'} ,
+    total: {$sum: 1}
+  }
+});
+```
 
 
 
