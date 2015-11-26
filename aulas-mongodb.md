@@ -287,29 +287,59 @@ Onde,
 #### Exemplo:
 
 ```
-db.collection.aggregate({
+db.pokemons.aggregate({
   $group: {
     _id: {},
     defense_avg: {$avg: '$defense'},
     attack_avg: {$avg: '$attack'},
     defense: {$sum: '$defense'},
-    attack: {$sum '$attack'} ,
+    attack: {$sum: '$attack'} ,
     total: {$sum: 1}
   }
 });
 ```
 
+## Aula 6
+
+### Relacionamentos entre coleções
+
+Dois tipos
+
+#### Manual
+
+Dado um array de ids gravado em uma coleção, cria-se uma função que recebe um id e busca na outra coleção pelo documento.
+
+Ex:
+A coleção inventário possui o seguinte elemento:
+```
+[{
+  name: 'Inventario Teste',
+  pokemons: [
+    {_id: ObjectId('123')},
+    {_id: ObjectId('456')},
+    {_id: ObjectId('789')}
+  ]
+}]
+```
+A função deve ser criada da seguinte maneira:
+```
+  var pokemons = [];
+  var getPokemons = function(id){pokemons.push(db.pokemons.findOne(id))};
+  var invt = db.inventario.findOne();  // Vai recuperar o objeto inventário acima
+  invt.pokemons.forEach(getPokemon);  
+```
+Ao fazer isso, o array pokemons estara preenchido com os documentos completos de pokemon.
 
 
+### DBRef
 
+Convenção para representar relacionamentos de documentos
 
+- $ref: nome da coleção referenciada
+- $id: o ObjectId do documento referenciado
+- $db: database onde a coleção referenciada se encontra
 
-
-
-
-
-
-
+Usado quando o documento está em outra database.
 
 
 
