@@ -326,7 +326,7 @@ A função deve ser criada da seguinte maneira:
   var pokemons = [];
   var getPokemons = function(id){pokemons.push(db.pokemons.findOne(id))};
   var invt = db.inventario.findOne();  // Vai recuperar o objeto inventário acima
-  invt.pokemons.forEach(getPokemon);  
+  invt.pokemons.forEach(getPokemon);
 ```
 Ao fazer isso, o array pokemons estara preenchido com os documentos completos de pokemon.
 
@@ -340,6 +340,198 @@ Convenção para representar relacionamentos de documentos
 - $db: database onde a coleção referenciada se encontra
 
 Usado quando o documento está em outra database.
+
+
+## Aula 6 - Parte 2
+
+
+### explain()
+
+Exibe o plano do mongodb para executar uma consulta. 
+
+Exemplo: 
+```
+db.restaurantes.find({"name": "Chin Chin Thai Kitchen"}).explain('executionStats');
+```
+  
+### Indices
+
+Assim como no SQL, usado para fazer pesquisas mais rápidas no banco. 
+
+Criando um indice:
+- Pode ser criado com -1, depende da necessidade
+- Pode ser criado um indice composto (com mais de um campo)
+
+```
+db.restaurantes.createIndex({name: 1});
+
+```
+
+Listando os indices de uma collection:
+```
+db.restaurantes.getIndexes();
+``` 
+
+Removendo um indice:
+- Se criar com -1, deve remover com -1 também
+```
+db.restaurantes.dropIndex({name: 1});
+```
+
+
+### GridFS
+
+É o sistema de arquivos do mongodb para armazenar arquivos binários maiores que 
+16Mb, já que até esse tamanho pode ser guardado no próprio JSON com um BSON.
+Como se fosse o BLOB no SQL. 
+
+O GridFS cria duas coleções no banco de dados:
+- *fs.chunks*: fica os arquivos binários dividos em pequenas partes chamdas 
+chunks. Cada chunk é um documento contendo 255Kb de dados.
+- *fs.files*: é armazenado os metadados do arquivo com tamanho, md5, nome do 
+arquivo, data do upload, etc.
+
+
+* É recomendável criar um servidor específico somente para o GridFS para que as 
+configurações sejam feitas pensando em otimizar o GridFS.
+
+#### Como usar
+
+Para inserir um arquivo, usar o binário _mongofiles_ passando:
+- -d nome do banco
+- -h host
+- put nome do arquivo
+
+Exemplo:
+
+```
+mongofiles -d be-mean-files -h 127.0.0.1 put nome_do_arquivo.mp4
+```
+
+### Replica
+
+#### Etapas da replicação
+
+- Initial Sync: ocorre no início, quando uma Replica copia todos os dados de 
+outra.
+  - Clona todos os bancos daquela replica.
+  - Aplica as alterações para o conjunto de dados. Usando o oplog a partir da 
+    fonte, o mongod atualiza seus dados para refletir o estado atual.
+  - Construir todos os indices que faltam em todas as coleções (menos _id)
+  - Muda de estado do normal para o secundário, pois foi criado o secundário.
+
+- Replication: membros do conjunto Replica replicam dados continuamente após a 
+sincronização.
+  - mongodb aplica as operações no primário e em seguida no oplog do primário.
+  - membros secundários copiam e aplica essas operações .
+
+oplog: é o log de alterações com todos as operações de modificações.
+
+#### Porque usar
+
+Garantir que os dados existam em outro lugar e caso o servidor principal caia,
+pode-se levantar outro com a replica.
+
+
+#### Como usar 
+
+- Passo 1
+Criar 3 diretorios na pasta /data, rs1, rs2, rs3
+- Passo 2
+Iniciar as três replicas
+
+```
+mongod --replSet replica_set --port 27017 --dbpath /data/rs1
+mongod --replSet replica_set --port 27018 --dbpath /data/rs2
+mongod --replSet replica_set --port 27019 --dbpath /data/rs3
+```
+
+Pode-se criar um script para iniciar as replicas: 
+```
+mongod --replSet replica_set --port 27017 --dbpath /data/rs1 --logpath /data/rs1/log.txt --fork
+mongod --replSet replica_set --port 27018 --dbpath /data/rs2 --logpath /data/rs2/log.txt --fork
+mongod --replSet replica_set --port 27019 --dbpath /data/rs3 --logpath /data/rs3/log.txt --fork
+```
+
+- Passo 3
+Iniciar o mongo na porta da primeira replicaset. Ela será nosso servidor primário:
+```
+mongo --port 27017
+```
+
+- Passo 4
+Na replicaset primária, iniciar a replicação com o comando:
+
+```
+
+rsconf = {
+  "_id": "replica_set",
+  "members": [
+    {
+      "_id": 0,
+      "host": "127.0.0.1:27017"
+    }
+  ]
+}
+
+rs.initiate(rsconf);
+```
+O terminal mudará para [PRIMARY]
+
+
+- Passo 5
+
+Adicionar as replicas secundárias. Dentro da primária, fazer:
+
+```
+rs.add("127.0.0.1:27018");
+rs.add("127.0.0.1:27019");
+```
+
+* Não será possivel rodar nenhum comando nas replicas secundárias, só na 
+primária.
+
+
+- Passo 6
+
+Para saber o status da replicação, rodar no primário:
+
+```
+rs.status()
+```
+
+Para ver o status do oplog, executar:
+
+```
+rs.printReplicationInfo()
+```
+
+- Passo 7
+
+É possivel rebaixar uma replica primária de modo que force o mongodb eleger 
+uma outra réplica secundária como primária. Para isso, executar na replica 
+primária:
+
+```
+rs.stepDown();
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
