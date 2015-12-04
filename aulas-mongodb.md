@@ -517,17 +517,48 @@ rs.stepDown();
 ```
 
 
+## Aula 7
+
+### Árbitro
+
+É um serviço que elege qual replica será a primária, caso a primária anterior venha a cair. É útil para decidir quando há um empate de replicas eleitas a serem primárias. Por isso, só deve ser usado quando há um número *par* de réplicas.
+
+Para criar um árbitro, deve se usar o mesmo procedimento para se criar uma replica.
+
+```
+mkdir /data/arb
+mongod --port 30000 --dbpath /data/arb --replSet replica_set
+```
+ E depois, basta se conectar na replica primária e adicionar o árbitro com o   seguinte comando:
+
+```
+ rs.addArb('127.0.0.1:30000');
+```
 
 
+### Sharding
+
+É o processo de armazenamento de registros de dados em várias máquinas para atender o crescimento dos dados.
+
+Quando a quantidade de dados ultrapassar a memória RAM o mongodb começa a fazer uma paginação nos dados e isso resultará em queda de performance, por isso é recomendado usar o sharding. 
+
+#### Diferença escalabilidade horizontal x vertical
+
+- Vertical: adicionar mais armazenamento, mais memória, etc. no mesmo servidor, por isso vc vai crescer para cima.
+- Horizontal: adiciona mais servidores e distribui a carga de processamento. O mongodb foi criado para esse tipo de escalabilidade.
 
 
+#### Como usar?
+
+É divido em três elementos:
+- shards: instância do mongodb que vai guardar pedaços de dados da coleção.
+- config server: instância do mongodb que guarda os metadados onde fica cada registro. Mapeiam os chunks de dados para os shards.
+- router: é uma instância de 'mongos' que faz o roteamento de leitura e escrita para os shards e por onde a aplicação vai se comunicar
 
 
+#### Criando um sharding 
 
-
-
-
-
+11:15
 
 
 
